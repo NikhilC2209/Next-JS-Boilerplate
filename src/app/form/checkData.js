@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation'
+import { redirect } from 'next/navigation';
 import { z } from "zod";
 
 export async function check(prevState, formData) {

@@ -2,6 +2,10 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+
+    "include": [
+      "middleware.js"
+    ],
   }
 }

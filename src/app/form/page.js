@@ -9,10 +9,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useFormState, useFormStatus } from "react-dom";
 import { check } from './checkData.js'
 import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 import { FcGoogle } from "react-icons/fc";
 import { AiFillGoogleCircle } from "react-icons/ai";
-import { FaFacebook } from "react-icons/fa";
+import { FaReddit } from "react-icons/fa";
 import { FaGithub } from "react-icons/fa";
 import { FaTwitter } from "react-icons/fa";
 import { FaUserCircle } from "react-icons/fa";
@@ -28,17 +29,44 @@ const initialState = {
 
 export default function Form() {
 
-	const loginwithGoogle = () => {
-		signIn('google', { callbackUrl: 'http://localhost:3000/dashboard'});
+	const router = useRouter();
+
+	const handleAuth = (event) => {
+
+		signIn(event.target.name, { callbackUrl: 'http://localhost:3000/dashboard'});
 	}
 
-	const [state, formAction] = useFormState(check, initialState);
+	const handleCredentials = async (prevState, formData) => {
+
+		const response = await signIn("credentials", { 
+			username: formData.get("username"),
+			password: formData.get("password"),
+			redirect: false, 
+		});
+
+		if(response.status==200) {
+			router.push('/dashboard');
+		}
+
+
+		if(response.status==401) {
+			setErrorMessage("Incorrect Username or Password");
+		}
+
+		console.log(response.status);
+
+	}
+
+	// const [state, formAction] = useFormState(check, initialState);
+	const [state, formAction] = useFormState(handleCredentials, initialState);
 	
 	const [validUser, isUserValid] = useState(false);
 	const [validPass, isPassValid] = useState(false);
 
 	const [userMessage, setUserMessage] = useState("");
 	const [passMessage, setPassMessage] = useState("");
+
+	const [errorMessage, setErrorMessage] = useState("");
 
 	const setValue = (event) => {
 
@@ -105,6 +133,7 @@ export default function Form() {
 		<div>
 			<div className="form-className backdrop-blur-md h-[80vh] w-[70vw] w-[60vw] flex flex-col my-[10vh] mx-[15vw] items-center shadow-2xl">
 			<h1 className="text-white font-['Helvetica']">Sample Login Form</h1>
+			{/* <form className="w-1/3 pt-3" action={formAction}> */}
 			<form className="w-1/3 pt-3" action={formAction}>
 			<div className="">
 			  <div className={`form-group my-3 flex flex-row h-1/6 items-center border-b-2 ${validUser ? "" : "border-b-red-600" } `}>
@@ -164,6 +193,9 @@ export default function Form() {
 					</svg>
 				</button>
 			  </div>
+			  <div>
+			  	<span className="text-sm text-red-600 font-mono font-bold">{errorMessage}</span>
+			  </div>
 			</div>
 
 			  <div className="my-2 flex flex-row items-center justify-between">
@@ -189,25 +221,25 @@ export default function Form() {
 
 			  <div className="grid grid-cols-4 gap-2 w-2/3 mt-2">
 				<div className="my-2 flex justify-center">
-				  	<button onClick={loginwithGoogle} className="bg-blue-500 flex flex-row items-center hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
+				  	<button onClick={handleAuth} name="google" className="bg-blue-500 flex flex-row items-center hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
 					  Login with 
 					  <FcGoogle className="mx-2"/> 
 					</button>
 			    </div>
 				<div className="my-2 flex justify-center">
-				  	<button className="bg-blue-500 flex flex-row items-center hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
+				  	<button onClick={handleAuth} name="reddit" className="bg-blue-500 flex flex-row items-center hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
 					  Login with 
-					  <FaFacebook className="mx-2"/>
+					  <FaReddit className="mx-2"/>
 					</button>
 			    </div>
 				<div className="my-2 flex justify-center">
-				  	<button className="bg-blue-500 flex flex-row items-center hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
+				  	<button onClick={handleAuth} name="github" className="bg-blue-500 flex flex-row items-center hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
 					  Login with 
 					  <FaGithub className="mx-2"/>
 					</button>
 			  	</div>				  
 			    <div className="my-2 flex justify-center">
-				  	<button className="bg-blue-500 flex flex-row items-center hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
+				  	<button onClick={handleAuth} name="twitter" className="bg-blue-500 flex flex-row items-center hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
 					  Login with 
 					  <FaTwitter className="mx-2"/>
 					</button>
